@@ -18,6 +18,9 @@ if ($conexion->connect_error) {
 header('Content-Type: application/json; charset=UTF-8');
 
 // Leer parámetros POST
+$idDepartamento = isset($_POST['id_departamento']) ? intval($_POST['id_departamento']) : 0;
+$idMunicipio    = isset($_POST['id_municipio'])    ? intval($_POST['id_municipio'])    : 0;
+$idDistrito     = isset($_POST['id_distrito'])     ? intval($_POST['id_distrito'])     : 0;
 $nombre         = isset($_POST['nombre'])         ? trim($_POST['nombre'])         : '';
 $apellido       = isset($_POST['apellido'])       ? trim($_POST['apellido'])       : '';
 $telefono       = isset($_POST['telefono'])       ? trim($_POST['telefono'])       : '';
@@ -26,7 +29,8 @@ $disponible     = isset($_POST['disponible'])     ? intval($_POST['disponible'])
 $activo         = isset($_POST['activo'])         ? intval($_POST['activo'])       : 1;
 
 // Validación
-if ($nombre === '' || $apellido === '' || $telefono === '' || $tipoVehiculo === '') {
+if ($nombre === '' || $apellido === '' || $telefono === '' || $tipoVehiculo === '' ||
+    $idDepartamento <= 0 || $idMunicipio <= 0 || $idDistrito <= 0) {
     http_response_code(400);
     echo json_encode([
         'success' => false,
@@ -37,7 +41,7 @@ if ($nombre === '' || $apellido === '' || $telefono === '' || $tipoVehiculo === 
 
 // Preparar y ejecutar INSERT
 $stmt = $conexion->prepare("
-    INSERT INTO REPARTIDOR (NOMBRE_REPARTIDOR, APELLIDO_REPARTIDOR, TELEFONO_REPARTIDOR, TIPO_VEHICULO, DISPONIBLE, ACTIVO_REPARTIDOR)
+    INSERT INTO REPARTIDOR ( ID_DEPARTAMENTO, ID_MUNICIPIO, ID_DISTRITO, NOMBRE_REPARTIDOR, APELLIDO_REPARTIDOR, TELEFONO_REPARTIDOR, TIPO_VEHICULO, DISPONIBLE, ACTIVO_REPARTIDOR)
     VALUES (?, ?, ?, ?, ?, ?)
 ");
 
@@ -50,7 +54,7 @@ if (!$stmt) {
     exit;
 }
 
-$stmt->bind_param('ssssii', $nombre, $apellido, $telefono, $tipoVehiculo, $disponible, $activo);
+$stmt->bind_param('ssssii',  $idDepartamento, $idMunicipio, $idDistrito,$nombre, $apellido, $telefono, $tipoVehiculo, $disponible, $activo);
 
 if ($stmt->execute()) {
     echo json_encode([

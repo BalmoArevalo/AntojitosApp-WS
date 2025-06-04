@@ -41,7 +41,7 @@ if ($nombre === '' || $apellido === '' || $telefono === '' || $tipoVehiculo === 
 
 // Preparar y ejecutar INSERT
 $stmt = $conexion->prepare("
-    INSERT INTO REPARTIDOR ( ID_DEPARTAMENTO, ID_MUNICIPIO, ID_DISTRITO, NOMBRE_REPARTIDOR, APELLIDO_REPARTIDOR, TELEFONO_REPARTIDOR, TIPO_VEHICULO, DISPONIBLE, ACTIVO_REPARTIDOR)
+    INSERT INTO REPARTIDOR ( ID_DEPARTAMENTO, ID_MUNICIPIO, ID_DISTRITO, TIPO_VEHICULO, DISPONIBLE , TELEFONO_REPARTIDOR, NOMBRE_REPARTIDOR, APELLIDO_REPARTIDOR, ACTIVO_REPARTIDOR)
     VALUES (?, ?, ?, ?, ?, ?)
 ");
 
@@ -54,7 +54,7 @@ if (!$stmt) {
     exit;
 }
 
-$stmt->bind_param('ssssii',  $idDepartamento, $idMunicipio, $idDistrito,$nombre, $apellido, $telefono, $tipoVehiculo, $disponible, $activo);
+$stmt->bind_param('ssssii',  $idDepartamento, $idMunicipio, $idDistrito, $tipoVehiculo, $disponible, $telefono, $nombre, $apellido,   $activo);
 
 if ($stmt->execute()) {
     echo json_encode([

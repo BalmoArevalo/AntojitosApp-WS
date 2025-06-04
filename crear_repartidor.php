@@ -1,0 +1,70 @@
+<?php
+$host     = 'localhost';
+$user     = 'root';
+$password = '';
+$dbname   = 'antojitos_bd';
+
+$conexion = new mysqli($host, $user, $password, $dbname);
+if ($conexion->connect_error) {
+    header('Content-Type: application/json; charset=UTF-8');
+    http_response_code(500);
+    echo json_encode([
+        'success' => false,
+        'message' => 'Error de conexión: ' . $conexion->connect_error
+    ]);
+    exit;
+}
+
+header('Content-Type: application/json; charset=UTF-8');
+
+// Leer parámetros POST
+$nombre         = isset($_POST['nombre'])         ? trim($_POST['nombre'])         : '';
+$apellido       = isset($_POST['apellido'])       ? trim($_POST['apellido'])       : '';
+$telefono       = isset($_POST['telefono'])       ? trim($_POST['telefono'])       : '';
+$tipoVehiculo   = isset($_POST['tipo_vehiculo'])  ? trim($_POST['tipo_vehiculo'])  : '';
+$disponible     = isset($_POST['disponible'])     ? intval($_POST['disponible'])   : 0;
+$activo         = isset($_POST['activo'])         ? intval($_POST['activo'])       : 1;
+
+// Validación
+if ($nombre === '' || $apellido === '' || $telefono === '' || $tipoVehiculo === '') {
+    http_response_code(400);
+    echo json_encode([
+        'success' => false,
+        'message' => 'Faltan parámetros obligatorios: nombre, apellido, teléfono o tipo de vehículo.'
+    ]);
+    exit;
+}
+
+// Preparar y ejecutar INSERT
+$stmt = $conexion->prepare("
+    INSERT INTO REPARTIDOR (NOMBRE_REPARTIDOR, APELLIDO_REPARTIDOR, TELEFONO_REPARTIDOR, TIPO_VEHICULO, DISPONIBLE, ACTIVO_REPARTIDOR)
+    VALUES (?, ?, ?, ?, ?, ?)
+");
+
+if (!$stmt) {
+    http_response_code(500);
+    echo json_encode([
+        'success' => false,
+        'message' => 'Error al preparar la consulta: ' . $conexion->error
+    ]);
+    exit;
+}
+
+$stmt->bind_param('ssssii', $nombre, $apellido, $telefono, $tipoVehiculo, $disponible, $activo);
+
+if ($stmt->execute()) {
+    echo json_encode([
+        'success' => true,
+        'message' => 'Repartidor creado correctamente.',
+        'id_repartidor' => $stmt->insert_id
+    ]);
+} else {
+    http_response_code(500);
+    echo json_encode([
+        'success' => false,
+        'message' => 'Error al insertar repartidor: ' . $stmt->error
+    ]);
+}
+
+$stmt->close();
+$conexion->close();
